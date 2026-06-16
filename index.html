@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>屈原端午亲子公园探秘</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e8dcc8; min-height: 100vh; overflow-x: hidden; }
+#cvs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.wrap { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; }
+.hd { text-align: center; padding: 30px 0 20px; }
+.hd h1 { font-size: 28px; color: #d4a24e; text-shadow: 0 0 20px rgba(212,162,78,0.5); margin-bottom: 10px; }
+.hd p { font-size: 14px; color: #5a8a6a; }
+.pbar { display: flex; align-items: center; justify-content: space-between; margin: 20px 0; padding: 0 10px; }
+.pbar .ln { width: 30px; height: 30px; border-radius: 50%; background: #1a1a2e; border: 2px solid #d4a24e; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #d4a24e; position: relative; cursor: pointer; transition: all 0.3s; }
+.pbar .ln.act { background: #d4a24e; color: #0a0e1a; box-shadow: 0 0 15px rgba(212,162,78,0.8); animation: pulse 2s infinite; }
+.pbar .ln.ok { background: #5a8a6a; border-color: #5a8a6a; color: #fff; }
+.pbar .ln span { position: absolute; bottom: -18px; font-size: 10px; white-space: nowrap; }
+.pbar .pbt { flex: 1; height: 3px; background: #1a1a2e; margin: 0 5px; border-radius: 2px; overflow: hidden; }
+.pbar .pbt .pbf { height: 100%; background: linear-gradient(90deg, #d4a24e, #5a8a6a); width: 0; transition: width 0.5s; }
+.pg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pg .npc { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #d4a24e, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; box-shadow: 0 5px 20px rgba(212,162,78,0.3); }
+.pg .dlg { background: rgba(26,26,46,0.9); border: 1px solid #d4a24e; border-radius: 15px; padding: 20px; margin-bottom: 20px; max-width: 90%; position: relative; }
+.pg .dlg:before { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #d4a24e; }
+.pg .dlg p { font-size: 15px; line-height: 1.8; color: #e8dcc8; }
+.pg .qst { font-size: 18px; color: #d4a24e; margin: 20px 0; text-align: center; padding: 0 10px; }
+.pg .opt { width: 100%; max-width: 400px; }
+.pg .opt .op { display: flex; align-items: center; padding: 15px; margin: 10px 0; background: rgba(26,26,46,0.8); border: 2px solid #1a1a2e; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+.pg .opt .op:hover { border-color: #d4a24e; transform: translateX(5px); }
+.pg .opt .op.cor { border-color: #5a8a6a; background: rgba(90,138,106,0.2); }
+.pg .opt .op.wrg { border-color: #c0392b; animation: shake 0.5s; }
+.pg .opt .op .on { width: 30px; height: 30px; border-radius: 50%; background: #d4a24e; color: #0a0e1a; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+.pg .opt .op .ot { flex: 1; font-size: 15px; }
+.pg .inp { width: 100%; max-width: 400px; }
+.pg .inp textarea { width: 100%; height: 120px; background: rgba(26,26,46,0.8); border: 2px solid #d4a24e; border-radius: 10px; padding: 15px; color: #e8dcc8; font-size: 15px; resize: none; outline: none; }
+.pg .inp textarea:focus { box-shadow: 0 0 15px rgba(212,162,78,0.3); }
+.pg .btn { margin-top: 20px; padding: 12px 40px; background: linear-gradient(135deg, #d4a24e, #c0392b); border: none; border-radius: 25px; color: #fff; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+.pg .btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(212,162,78,0.5); }
+.pop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
+.pop.act { display: flex; }
+.pop .pc { background: linear-gradient(135deg, #0a0e1a, #1a1a2e); border: 2px solid #d4a24e; border-radius: 20px; padding: 30px; max-width: 90%; width: 400px; text-align: center; animation: popup 0.5s; }
+.pop .pc h2 { color: #d4a24e; font-size: 24px; margin-bottom: 15px; }
+.pop .pc p { font-size: 15px; line-height: 1.8; margin: 10px 0; }
+.pop .pc .clue { background: rgba(212,162,78,0.1); border: 1px solid #d4a24e; border-radius: 10px; padding: 15px; margin: 15px 0; }
+.pop .pc .clue h3 { color: #5a8a6a; font-size: 18px; }
+.pop .pc .btn { margin-top: 15px; }
+.cert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; align-items: center; justify-content: center; }
+.cert.act { display: flex; }
+.cert .cc { background: #e8dcc8; color: #0a0e1a; border-radius: 20px; padding: 40px; max-width: 90%; width: 500px; text-align: center; position: relative; overflow: hidden; }
+.cert .cc:before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(212,162,78,0.1) 0%, transparent 70%); }
+.cert .cc h2 { font-size: 28px; color: #c0392b; margin-bottom: 20px; }
+.cert .cc .info { text-align: left; margin: 20px 0; }
+.cert .cc .info p { font-size: 16px; margin: 10px 0; }
+.cert .cc .seal { width: 80px; height: 80px; margin: 20px auto; border: 3px solid #c0392b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #c0392b; transform: rotate(-15deg); animation: seal 1s; }
+.cert .cc .btn { background: #0a0e1a; color: #e8dcc8; }
+.admin { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; align-items: center; justify-content: center; }
+.admin.act { display: flex; }
+.admin .ac { background: #1a1a2e; border: 2px solid #d4a24e; border-radius: 20px; padding: 30px; max-width: 90%; width: 500px; max-height: 80vh; overflow-y: auto; }
+.admin .ac h2 { color: #d4a24e; margin-bottom: 20px; }
+.admin .ac .stat { background: rgba(26,26,46,0.5); padding: 15px; border-radius: 10px; margin: 10px 0; }
+.admin .ac .stat p { font-size: 14px; margin: 5px 0; }
+.admin .ac .btn { margin: 10px 5px; padding: 10px 20px; background: #c0392b; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+.admin .ac .btn:hover { background: #d4a24e; color: #0a0e1a; }
+.name-inp { text-align: center; }
+.name-inp h2 { color: #d4a24e; margin-bottom: 20px; }
+.name-inp input { width: 80%; max-width: 300px; padding: 12px; background: rgba(26,26,46,0.8); border: 2px solid #d4a24e; border-radius: 10px; color: #e8dcc8; font-size: 16px; text-align: center; outline: none; }
+.name-inp input:focus { box-shadow: 0 0 15px rgba(212,162,78,0.3); }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 15px rgba(212,162,78,0.8); } 50% { box-shadow: 0 0 25px rgba(212,162,78,1); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+@keyframes popup { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes seal { from { transform: rotate(-15deg) scale(0); } to { transform: rotate(-15deg) scale(1); } }
+@media (max-width: 480px) { .hd h1 { font-size: 22px; } .pg .dlg p { font-size: 14px; } .pg .qst { font-size: 16px; } }
+</style>
+</head>
+<body>
+<canvas id="cvs"></canvas>
+<div class="wrap">
+  <div class="hd">
+    <h1>屈原端午亲子公园探秘</h1>
+    <p>穿越千年，探寻屈原精神</p>
+  </div>
+  <div class="pbar" id="pbar"></div>
+  <div class="pg" id="pg"></div>
+</div>
+<div class="pop" id="pop">
+  <div class="pc" id="pc"></div>
+</div>
+<div class="cert" id="cert">
+  <div class="cc" id="cc"></div>
+</div>
+<div class="admin" id="admin">
+  <div class="ac" id="ac"></div>
+</div>
+
+<script>
+// ============ 配置与数据 ============
+const C = {
+  pwd: '8023', // 管理员密码
+  cols: ['#d4a24e','#c0392b','#5a8a6a'], // 粒子颜色
+  npc: ['🧙','👨🏫','🧑✈️','👩🍳','🎭','📜'] // NPC图标
+};
+// 关卡数据
+const L = [
+  { id:0, name:'序章', title:'穿越楚国', npc:'屈原', q:'屈原是哪个国家的人？', opts:['楚国','秦国','赵国','魏国'], ans:0, clue:'楚国印记', story:'我是楚国大夫屈原…' },
+  { id:1, name:'第二关', title:'香草美人', npc:'婵娟', q:'屈原用"香草"比喻什么？', opts:['高洁品格','美貌女子','珍贵香料','宫廷装饰'], ans:0, clue:'香草之谜', story:'先生常以香草自喻…' },
+  { id:2, name:'第三关', title:'龙舟之谜', npc:'渔父', q:'划龙舟是为了什么？', opts:['纪念屈原','祈求雨水的祭祀','训练水军','庆祝丰收'], ans:0, clue:'龙魂传承', story:'每年五月初五…' },
+  { id:3, name:'第四关', title:'粽子传奇', npc:'老妪', q:'投粽子入江是为了什么？', opts:['让鱼虾不咬屈原','喂饱河神保平安','祭祀龙王爷','送给屈原当干粮'], ans:0, clue:'千年粽香', story:'我老公公说啊…' },
+  { id:4, name:'第五关', title:'千古绝唱', npc:'宋玉', q:'屈原最著名的作品是？', opts:['《离骚》','《天问》','《九歌》','《怀沙》'], ans:0, clue:'离骚长歌', story:'先生的《离骚》…' },
+  { id:5, name:'终章', title:'屈原精神', npc:'屈原', q:'写下你对屈原精神的感悟', opts:[], ans:-1, clue:'全部碎片', story:'感谢你一路探寻…', isText:true }
+];
+// ============ 全局状态 ============
+let S = { name:'', level:0, score:0, start:null, clues:[], answers:[] };
+
+// ============ 初始化 ============
+function init() {
+  load();
+  canvas();
+  if (!S.name) showName();
+  else showLevel();
+  // 管理员快捷键：连续点击标题5次
+  let c = 0;
+  document.querySelector('.hd h1').addEventListener('click', () => { c++; if (c >= 5) { c = 0; showAdmin(); } });
+}
+
+// ============ 本地存储 ============
+function save() { localStorage.setItem('qy_quest', JSON.stringify(S)); }
+function load() { const d = localStorage.getItem('qy_quest'); if (d) S = JSON.parse(d); }
+
+// ============ Canvas粒子效果 ============
+function canvas() {
+  const c = document.getElementById('cvs'), x = c.getContext('2d');
+  let w, h, ps = [];
+  function rs() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+  rs(); window.addEventListener('resize', rs);
+  class P {
+    constructor() { this.r(); }
+    r() { this.x = Math.random() * w; this.y = Math.random() * h; this.s = Math.random() * 2 + 1; this.sp = Math.random() * 0.5 + 0.2; this.d = Math.random() * Math.PI * 2; this.c = C.cols[Math.floor(Math.random() * C.cols.length)]; this.o = Math.random() * 0.5 + 0.3; }
+    u() { this.y -= this.sp; this.x += Math.sin(this.d) * 0.3; this.d += 0.01; if (this.y < -10) this.r(), this.y = h + 10; }
+    d() { x.beginPath(); x.arc(this.x, this.y, this.s, 0, Math.PI * 2); x.fillStyle = this.c; x.globalAlpha = this.o; x.fill(); x.globalAlpha = 1; }
+  }
+  for (let i = 0; i < 50; i++) ps.push(new P());
+  function loop() { x.clearRect(0,0,w,h); ps.forEach(p => { p.u(); p.d(); }); requestAnimationFrame(loop); }
+  loop();
+}
+
+// ============ 进度条 ============
+function updPbar() {
+  const pb = document.getElementById('pbar');
+  let h = '';
+  L.forEach((l, i) => {
+    if (i > 0) h += `<div class="pbt"><div class="pbf" style="width:${i <= S.level ? 100 : 0}%"></div></div>`;
+    const cls = i < S.level ? 'ln ok' : i === S.level ? 'ln act' : 'ln';
+    h += `<div class="${cls}">${i+1}<span>${l.name}</span></div>`;
+  });
+  pb.innerHTML = h;
+}
+
+// ============ 显示输入名字 ============
+function showName() {
+  const pg = document.getElementById('pg');
+  S.start = Date.now();
+  pg.innerHTML = `
+    <div class="name-inp">
+      <div class="npc">🏮</div>
+      <div class="dlg"><p>欢迎来到屈原端午亲子公园探秘！<br>我是你的向导，请告诉我你的名字，我们即将穿越千年，探寻屈原的足迹…</p></div>
+      <h2 style="color:#d4a24e;margin:30px 0 20px;">请输入你的名字</h2>
+      <input type="text" id="nameInput" placeholder="请输入姓名" maxlength="20" autocomplete="off">
+      <br><br>
+      <button class="btn" onclick="submitName()">开始探秘</button>
+    </div>`;
+  setTimeout(() => document.getElementById('nameInput')?.focus(), 100);
+}
+
+function submitName() {
+  const n = document.getElementById('nameInput')?.value.trim();
+  if (!n) { alert('请输入名字'); return; }
+  S.name = n; save(); showLevel();
+}
+
+// ============ 显示关卡 ============
+function showLevel() {
+  updPbar();
+  const pg = document.getElementById('pg');
+  const l = L[S.level];
+  if (!l) { showCert(); return; }
+  const isLast = S.level === L.length - 1;
+  if (l.isText) {
+    // 终章：文本输入
+    pg.innerHTML = `
+      <div class="npc">${C.npc[l.id]}</div>
+      <div class="dlg"><p>${l.story}</p></div>
+      <div class="qst">${l.q}</div>
+      <div class="inp">
+        <textarea id="textAns" placeholder="请写下你的感悟…（至少20字）" maxlength="500"></textarea>
+      </div>
+      <button class="btn" onclick="submitText()">提交感悟</button>`;
+  } else {
+    // 选择题
+    let opts = '';
+    l.opts.forEach((o, i) => { opts += `<div class="op" data-i="${i}" onclick="checkAns(${i})"><div class="on">${String.fromCharCode(65+i)}</div><div class="ot">${o}</div></div>`; });
+    pg.innerHTML = `
+      <div class="npc">${C.npc[l.id]}</div>
+      <div class="dlg"><p>${l.story}</p></div>
+      <div class="qst">${l.q}</div>
+      <div class="opt">${opts}</div>`;
+  }
+}
+
+// ============ 检查答案 ============
+function checkAns(i) {
+  const l = L[S.level];
+  const ops = document.querySelectorAll('.op');
+  if (i === l.ans) {
+    // 答对
+    ops[i].classList.add('cor');
+    S.score++;
+    S.clues.push(l.clue);
+    S.answers.push({ level: l.id, correct: true, answer: i });
+    save();
+    setTimeout(() => showPop(true), 500);
+  } else {
+    // 答错
+    ops[i].classList.add('wrg');
+    S.answers.push({ level: l.id, correct: false, answer: i });
+    save();
+    setTimeout(() => { ops[i].classList.remove('wrg'); }, 500);
+  }
+}
+
+// ============ 提交文本 ============
+function submitText() {
+  const t = document.getElementById('textAns')?.value.trim();
+  if (!t || t.length < 20) { alert('请至少输入20个字'); return; }
+  S.clues.push(L[S.level].clue);
+  S.answers.push({ level: L[S.level].id, correct: true, answer: t });
+  save();
+  showPop(true);
+}
+
+// ============ 弹窗 ============
+function showPop(isCorrect) {
+  const l = L[S.level];
+  const pop = document.getElementById('pop');
+  const pc = document.getElementById('pc');
+  let h = `<h2>🎉 恭喜${isCorrect ? '答对' : ''}！</h2>`;
+  if (isCorrect) {
+    h += `
+      <div class="clue">
+        <h3>✨ 获得线索碎片 ✨</h3>
+        <p style="font-size:20px;color:#d4a24e;margin:10px 0;">【${l.clue}】</p>
+      </div>
+      <p>${S.level < L.length - 1 ? '点击下方按钮继续探秘' : '恭喜你集齐全部线索碎片！'}</p>
+      <button class="btn" onclick="nextLevel()">${S.level < L.length - 1 ? '继续探秘' : '查看证书'}</button>`;
+  }
+  pc.innerHTML = h;
+  pop.classList.add('act');
+}
+
+function nextLevel() {
+  document.getElementById('pop').classList.remove('act');
+  S.level++;
+  save();
+  showLevel();
+}
+
+// ============ 证书 ============
+function showCert() {
+  const pg = document.getElementById('pg');
+  const cert = document.getElementById('cert');
+  const cc = document.getElementById('cc');
+  const total = L.length - 1; // 排除终章
+  const correct = S.score;
+  const pct = Math.round((correct / total) * 100);
+  const duration = Math.round((Date.now() - S.start) / 1000);
+  const mins = Math.floor(duration / 60);
+  const secs = duration % 60;
+  cc.innerHTML = `
+    <h2>🏆 探秘证书 🏆</h2>
+    <p style="font-size:20px;margin:20px 0;color:#c0392b;">屈原端午亲子公园探秘</p>
+    <div class="info">
+      <p><strong>姓名：</strong>${S.name}</p>
+      <p><strong>正确率：</strong>${pct}%（${correct}/${total}）</p>
+      <p><strong>用时：</strong>${mins}分${secs}秒</p>
+      <p><strong>日期：</strong>${new Date().toLocaleDateString('zh-CN')}</p>
+    </div>
+    <div class="seal">屈原祠 纪念</div>
+    <p style="font-size:12px;color:#999;margin-top:20px;">线索碎片：${S.clues.join('、')}</p>
+    <button class="btn" onclick="window.print()">打印证书</button>
+    <button class="btn" style="background:#c0392b;margin-left:10px;" onclick="resetGame()">重新挑战</button>`;
+  cert.classList.add('act');
+  // 保存记录
+  saveRecord({ name: S.name, score: pct, time: duration, date: new Date().toISOString(), clues: S.clues.length });
+}
+
+// ============ 保存记录 ============
+function saveRecord(r) {
+  let recs = JSON.parse(localStorage.getItem('qy_recs') || '[]');
+  recs.push(r);
+  localStorage.setItem('qy_recs', JSON.stringify(recs));
+}
+
+// ============ 重置游戏 ============
+function resetGame() {
+  if (!confirm('确定要重新开始吗？当前进度将丢失！')) return;
+  S = { name: '', level: 0, score: 0, start: null, clues: [], answers: [] };
+  localStorage.removeItem('qy_quest');
+  document.getElementById('cert').classList.remove('act');
+  showName();
+}
+
+// ============ 管理员面板 ============
+function showAdmin() {
+  const pwd = prompt('请输入管理员密码：');
+  if (pwd !== C.pwd) { alert('密码错误！'); return; }
+  const admin = document.getElementById('admin');
+  const ac = document.getElementById('ac');
+  const recs = JSON.parse(localStorage.getItem('qy_recs') || '[]');
+  let h = `<h2>管理员面板</h2>`;
+  if (recs.length === 0) {
+    h += `<p>暂无数据</p>`;
+  } else {
+    const avg = Math.round(recs.reduce((a, r) => a + r.score, 0) / recs.length);
+    const full = recs.filter(r => r.score === 100).length;
+    h += `
+      <div class="stat">
+        <p><strong>总参与人数：</strong>${recs.length}</p>
+        <p><strong>平均分：</strong>${avg}%</p>
+        <p><strong>满分人数：</strong>${full}</p>
+      </div>
+      <h3 style="color:#d4a24e;margin:20px 0 10px;">详细记录</h3>`;
+    recs.forEach((r, i) => {
+      h += `<div class="stat">
+        <p>${i+1}. ${r.name} | ${r.score}% | ${Math.floor(r.time/60)}分${r.time%60}秒 | ${new Date(r.date).toLocaleDateString('zh-CN')}</p>
+      </div>`;
+    });
+    h += `
+      <button class="btn" onclick="exportCSV()">导出CSV</button>
+      <button class="btn" onclick="clearData()">清空数据</button>`;
+  }
+  h += `<button class="btn" style="background:#5a8a6a;margin-top:10px;" onclick="document.getElementById('admin').classList.remove('act')">关闭</button>`;
+  ac.innerHTML = h;
+  admin.classList.add('act');
+}
+
+// ============ 导出CSV ============
+function exportCSV() {
+  const recs = JSON.parse(localStorage.getItem('qy_recs') || '[]');
+  if (recs.length === 0) return;
+  let csv = '\ufeff姓名,正确率,用时(秒),日期,线索数\n';
+  recs.forEach(r => { csv += `${r.name},${r.score},${r.time},${r.date},${r.clues}\n`; });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `屈原探秘_${new Date().toLocaleDateString('zh-CN')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ============ 清空数据 ============
+function clearData() {
+  if (!confirm('确定要清空所有数据吗？此操作不可恢复！')) return;
+  localStorage.removeItem('qy_recs');
+  document.getElementById('admin').classList.remove('act');
+  alert('数据已清空');
+}
+
+// ============ 启动 ============
+init();
+</script>
+</body>
+</html>
